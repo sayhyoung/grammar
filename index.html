@@ -208,8 +208,8 @@
         return;
       }
 
-      // API 호출 (Cloudflare Worker)
-      fetch("https://grammar.sehyunglee2015.workers.dev//generate", {
+      // Cloudflare Workers URL로 요청
+      fetch("https://grammar.sehyunglee2015.workers.dev/generate", { // 중복된 '/' 제거
         method: "POST",
         headers: {
           "Content-Type": "application/json",
