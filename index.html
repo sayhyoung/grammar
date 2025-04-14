@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>문법 문제 생성기 - 윤선생 AI 실험실</title>
+  <style>
+    /* Portal 기본 디자인 */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f8a7a7;
+      line-height: 1.6;
+    }
+    header {
+      background-color: #333333;
+      color: #fafafa;
+      padding: 20px 10px;
+      text-align: center;
+    }
+    main {
+      padding: 20px;
+      max-width: 1000px;
+      margin: 20px auto;
+      background-color: #fff;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    footer {
+      background-color: #333;
+      color: #fff;
+      text-align: center;
+      padding: 10px;
+      margin-top: 20px;
+    }
+    footer img {
+      vertical-align: middle;
+      margin-left: 10px;
+    }
+    
+    /* 문법 문제 생성기 섹션 스타일 */
+    #grammar-generator {
+      margin: 30px 0;
+    }
+    #grammar-generator h2 {
+      text-align: center;
+      color: #1c2b4c;
+      margin-bottom: 20px;
+    }
+    #grammar-generator form {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 15px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    #grammar-generator label {
+      font-weight: bold;
+    }
+    #grammar-generator select, 
+    #grammar-generator button {
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    #grammar-generator button {
+      background-color: #1c2b4c;
+      color: #fff;
+      cursor: pointer;
+      border: none;
+    }
+    #grammar-generator button:hover {
+      background-color: #16203d;
+    }
+    #grammar-generator #output {
+      margin-top: 20px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>💡 윤선생 AI 실험실 💡</h1>
+    <p>AI 기반 영어 학습 도구</p>
+  </header>
+
+  <main>
+    <!-- 문법 문제 생성기 섹션 -->
+    <section id="grammar-generator">
+      <h2>문법 문제 생성기</h2>
+      <form id="grammarForm" onsubmit="event.preventDefault(); generateQuestion();">
+        <!-- 학년 선택 -->
+        <label for="grade">학년을 선택하세요:</label>
+        <select id="grade">
+          <option value="">-- 학년 선택 --</option>
+        </select>
+
+        <!-- 문법 항목 선택 -->
+        <label for="grammarCategory">문법 항목을 선택하세요:</label>
+        <select id="grammarCategory">
+          <option value="">-- 문법 항목 선택 --</option>
+        </select>
+
+        <!-- 문법 세부 항목 선택 -->
+        <label for="grammarDetail">세부 항목을 선택하세요:</label>
+        <select id="grammarDetail">
+          <option value="">-- 세부 항목 선택 --</option>
+        </select>
+
+        <!-- 문항 수 선택 -->
+        <label for="questionCount">문항 수를 선택하세요:</label>
+        <select id="questionCount">
+          <option value="1">1문항</option>
+          <option value="2">2문항</option>
+          <option value="3">3문항</option>
+          <option value="5">5문항</option>
+          <option value="10">10문항</option>
+        </select>
+
+        <button type="submit">문항 생성</button>
+      </form>
+      <div id="output"></div>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 윤선생 AI 실험실. All rights reserved.</p>
+    <img src="company-logo.png" alt="회사 로고" style="height:40px;">
+  </footer>
+
+  <script>
+    let grammarData = {};
+
+    // grammar.json 파일을 로드합니다.
+    fetch('grammar.json')
+      .then(response => response.json())
+      .then(data => {
+        grammarData = data;
+        populateGrades();
+      })
+      .catch(err => console.error("문법 데이터 로드 중 오류 발생:", err));
+
+    // 학년 셀렉트 박스 채우기
+    function populateGrades() {
+      const gradeSelect = document.getElementById("grade");
+      gradeSelect.innerHTML = '<option value="">-- 학년 선택 --</option>';
+      for (const grade in grammarData) {
+        const option = document.createElement("option");
+        option.value = grade;
+        option.textContent = grade;
+        gradeSelect.appendChild(option);
+      }
+    }
+
+    // 학년 선택 시 문법 항목 업데이트
+    document.getElementById("grade").addEventListener("change", function(){
+      const grade = this.value;
+      populateGrammarCategories(grade);
+      // 문법 세부 항목 초기화
+      document.getElementById("grammarDetail").innerHTML = '<option value="">-- 세부 항목 선택 --</option>';
+    });
+
+    // 문법 항목(첫 단계) 업데이트
+    function populateGrammarCategories(grade) {
+      const categorySelect = document.getElementById("grammarCategory");
+      categorySelect.innerHTML = '<option value="">-- 문법 항목 선택 --</option>';
+      if (grammarData[grade]) {
+        for (const category in grammarData[grade]) {
+          const option = document.createElement("option");
+          option.value = category;
+          option.textContent = category;
+          categorySelect.appendChild(option);
+        }
+      }
+    }
+
+    // 문법 항목 선택 시 세부 항목(두 번째 단계) 업데이트
+    document.getElementById("grammarCategory").addEventListener("change", function(){
+      const grade = document.getElementById("grade").value;
+      const category = this.value;
+      populateGrammarDetails(grade, category);
+    });
+
+    // 세부 항목 셀렉트 박스 업데이트
+    function populateGrammarDetails(grade, category) {
+      const detailSelect = document.getElementById("grammarDetail");
+      detailSelect.innerHTML = '<option value="">-- 세부 항목 선택 --</option>';
+      if (grammarData[grade] && grammarData[grade][category]) {
+        grammarData[grade][category].forEach(detail => {
+          const option = document.createElement("option");
+          option.value = detail;
+          option.textContent = detail;
+          detailSelect.appendChild(option);
+        });
+      }
+    }
+
+    // 문항 생성 버튼 클릭 시 실행되는 함수
+    function generateQuestion() {
+      const grade = document.getElementById("grade").value;
+      const category = document.getElementById("grammarCategory").value;
+      const detail = document.getElementById("grammarDetail").value;
+      const questionCount = document.getElementById("questionCount").value;
+
+      if (!grade || !category || !detail) {
+        document.getElementById("output").innerText = "학년, 문법 항목, 세부 항목을 모두 선택해주세요.";
+        return;
+      }
+
+      // API 호출 (Cloudflare Worker)
+      fetch("https://grammar.sehyunglee2015.workers.dev//generate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ grade, category, detail, questionCount }),
+      })
+        .then(response => response.json())
+        .then(data => {
+          document.getElementById("output").innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+        })
+        .catch(err => {
+          console.error("문제 생성 중 오류 발생:", err);
+          document.getElementById("output").innerText = "문제 생성 중 오류가 발생했습니다.";
+        });
+    }
+  </script>
+</body>
+</html>
