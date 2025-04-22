@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>문법 문제 생성기 - 윤선생 AI 실험실</title>
   <style>
-    /* Portal 기본 디자인 */
+    /* ──────────── 기본 스타일 ──────────── */
     body {
       font-family: Arial, sans-serif;
       margin: 0;
@@ -16,7 +16,7 @@
     header {
       background-color: #333333;
       color: #fafafa;
-      padding: 20px 10px;
+      padding: 15px 10px;
       text-align: center;
     }
     main {
@@ -37,80 +37,183 @@
       vertical-align: middle;
       margin-left: 10px;
     }
-    
-    /* 문법 문제 생성기 섹션 스타일 */
-    #grammar-generator {
-      margin: 30px 0;
-    }
-    #grammar-generator h2 {
-      text-align: center;
-      color: #1c2b4c;
+
+    /* ──────────── 탭 메뉴 ──────────── */
+    #tabs {
+      display: flex;
+      justify-content: center;
       margin-bottom: 20px;
     }
-    #grammar-generator form {
+    .tab-btn {
+      padding: 10px 20px;
+      border: 1px solid #ccc;
+      cursor: pointer;
+      background-color: #fff;
+      margin: 0 5px;
+      border-radius: 4px 4px 0 0;
+    }
+    .tab-btn.active {
+      background-color: #1c87c9;
+      color: #fff;
+      border-bottom: none;
+    }
+
+    /* ──────────── 섹션 ──────────── */
+    .section {
+      display: none;
+    }
+    .section.active {
+      display: block;
+    }
+
+    /* ──────────── 폼 ──────────── */
+    form {
       display: grid;
       grid-template-columns: 1fr;
       gap: 15px;
       max-width: 600px;
-      margin: 0 auto;
+      margin: auto;
+      padding: 15px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      background-color: #fafafa;
     }
-    #grammar-generator label {
+    form label {
       font-weight: bold;
     }
-    #grammar-generator select, 
-    #grammar-generator button {
+    form select,
+    form button {
       padding: 10px;
       font-size: 16px;
       border: 1px solid #ccc;
       border-radius: 4px;
     }
-    #grammar-generator button {
-      background-color: #1c2b4c;
+    form button {
+      background-color: #1c87c9;
       color: #fff;
       cursor: pointer;
       border: none;
     }
-    #grammar-generator button:hover {
-      background-color: #16203d;
+    form button:hover {
+      background-color: #155d8b;
     }
-    #grammar-generator #output {
-      margin-top: 20px;
+
+    /* ──────────── 문제·정답 영역 ──────────── */
+    #output,
+    #answerSection {
+      max-width: 600px;
+      margin: 20px auto;
+      padding: 15px;
+      background-color: #eaeaea;
+      border-radius: 4px;
+      white-space: pre-wrap;
+      overflow-wrap: break-word;
+    }
+    #answerSection {
+      display: none;
+      margin-top: 10px;
+      background-color: #d0e6f6;
+    }
+
+    /* ──────────── 버튼 모음 ──────────── */
+    .action-buttons {
       text-align: center;
+      margin-top: 15px;
     }
+    .action-buttons button {
+      padding: 10px 15px;
+      margin: 0 5px;
+      font-size: 16px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      background-color: #1c87c9;
+      color: #fff;
+    }
+    .action-buttons button:hover {
+      background-color: #155d8b;
+    }
+
+    /* 기존 스타일 유지 */
+    #activity-loading-indicator {
+      display: none;
+      margin-top: 5px;
+      text-align: center;
+      font-size: 14px;
+      color: red;
+    }
+    /* 회전 스피너 스타일 추가 */
+    .spinner {
+      margin: 0 auto 5px;
+      width: 20px;
+      height: 20px;
+      border: 3px solid red;
+      border-top: 3px solid transparent;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    @media print {
+      /* 탭 메뉴 (문제 생성, 문제 확인 버튼) 숨김 */
+      #tabs { display: none; }
+      
+      /* 정답보기, 인쇄하기 버튼이 포함된 영역 숨김 */
+      .action-buttons { display: none; }
+      
+      /* 필요에 따라 헤더/푸터 등도 숨길 수 있음 */
+      header, footer { display: none; }
+    }
+
+    header p {
+  font-size: 18px;
+}
   </style>
 </head>
+
 <body>
+  <!-- ──────────── 헤더 ──────────── -->
   <header>
     <h1>💡 윤선생 AI 실험실 💡</h1>
     <p>AI 기반 영어 학습 도구</p>
   </header>
 
+  <!-- ──────────── 메인 ──────────── -->
   <main>
-    <!-- 문법 문제 생성기 섹션 -->
-    <section id="grammar-generator">
-      <h2>문법 문제 생성기</h2>
-      <form id="grammarForm" onsubmit="event.preventDefault(); generateQuestion();">
+    <!-- 탭 메뉴 -->
+    <div id="tabs">
+      <button id="tabCreate" class="tab-btn active">문제 생성</button>
+      <button id="tabCheck"  class="tab-btn">문제 확인</button>
+    </div>
+
+    <!-- ───── 문제 생성 섹션 ───── -->
+    <section id="createSection" class="section active">
+      <form id="grammarForm">
         <!-- 학년 선택 -->
-        <label for="grade">학년을 선택하세요:</label>
+        <label for="grade">❇️ 원하는 학년 수준을 선택하세요.</label>
         <select id="grade">
-          <option value="">-- 학년 선택 --</option>
+          <option value="">-- 학년 --</option>
         </select>
 
         <!-- 문법 항목 선택 -->
-        <label for="grammarCategory">문법 항목을 선택하세요:</label>
+        <label for="grammarCategory">❇️ 문법 항목을 선택하세요.</label>
         <select id="grammarCategory">
-          <option value="">-- 문법 항목 선택 --</option>
+          <option value="">-- 문법 항목 --</option>
         </select>
 
-        <!-- 문법 세부 항목 선택 -->
-        <label for="grammarDetail">세부 항목을 선택하세요:</label>
+        <!-- 세부 항목 선택 -->
+        <label for="grammarDetail">❇️ 세부 항목을 선택하세요.</label>
         <select id="grammarDetail">
-          <option value="">-- 세부 항목 선택 --</option>
+          <option value="">-- 세부 항목 --</option>
         </select>
 
         <!-- 문항 수 선택 -->
-        <label for="questionCount">문항 수를 선택하세요:</label>
+        <label for="questionCount">❇️ 문항 수를 선택하세요.</label>
         <select id="questionCount">
+          <option value="0">-- 문항 수 -- </option>
           <option value="1">1문항</option>
           <option value="2">2문항</option>
           <option value="3">3문항</option>
@@ -118,113 +221,177 @@
           <option value="10">10문항</option>
         </select>
 
-        <button type="submit">문항 생성</button>
+     
+<!-- 생성 버튼 바로 아래에 로딩 인디케이터 수정 -->
+<button type="submit">문제 생성</button>
+<div id="activity-loading-indicator" style="display:none;">
+  <div class="spinner"></div>
+  <span>문제를 생성 중입니다...</span>
+</div>
+
       </form>
+    </section>
+
+    <!-- ───── 문제 확인 섹션 ───── -->
+    <section id="checkSection" class="section">
+     <h2 id="reviewTitle" style="text-align:center;"></h2>
       <div id="output"></div>
+      <div class="action-buttons">
+        <button id="showAnswerBtn">정답보기</button>
+        <button id="printBtn">인쇄하기</button>
+      </div>
+      <div id="answerSection"></div>
     </section>
   </main>
 
+  <!-- ──────────── 푸터 ──────────── -->
   <footer>
     <p>&copy; 2025 윤선생 AI 실험실. All rights reserved.</p>
     <img src="company-logo.png" alt="회사 로고" style="height:40px;">
   </footer>
 
+  <!-- ──────────── 스크립트 ──────────── -->
   <script>
+    /* ── 1. grammar.json 로드 ── */
     let grammarData = {};
 
-    // grammar.json 파일을 로드합니다.
     fetch('grammar.json')
-      .then(response => response.json())
+      .then(res => res.json())
       .then(data => {
         grammarData = data;
         populateGrades();
       })
-      .catch(err => console.error("문법 데이터 로드 중 오류 발생:", err));
+      .catch(err => console.error('문법 데이터 로드 오류:', err));
 
-    // 학년 셀렉트 박스 채우기
+    /* ── 2. 드롭다운 채우기 ── */
     function populateGrades() {
-      const gradeSelect = document.getElementById("grade");
+      const gradeSelect = document.getElementById('grade');
       gradeSelect.innerHTML = '<option value="">-- 학년 선택 --</option>';
-      for (const grade in grammarData) {
-        const option = document.createElement("option");
-        option.value = grade;
-        option.textContent = grade;
-        gradeSelect.appendChild(option);
-      }
+      Object.keys(grammarData).forEach(grade => {
+        const opt = document.createElement('option');
+        opt.value = grade;
+        opt.textContent = grade;
+        gradeSelect.appendChild(opt);
+      });
     }
 
-    // 학년 선택 시 문법 항목 업데이트
-    document.getElementById("grade").addEventListener("change", function(){
+    document.getElementById('grade').addEventListener('change', function () {
       const grade = this.value;
       populateGrammarCategories(grade);
-      // 문법 세부 항목 초기화
-      document.getElementById("grammarDetail").innerHTML = '<option value="">-- 세부 항목 선택 --</option>';
+      document.getElementById('grammarDetail').innerHTML = '<option value="">-- 세부 항목 선택 --</option>';
     });
 
-    // 문법 항목(첫 단계) 업데이트
     function populateGrammarCategories(grade) {
-      const categorySelect = document.getElementById("grammarCategory");
+      const categorySelect = document.getElementById('grammarCategory');
       categorySelect.innerHTML = '<option value="">-- 문법 항목 선택 --</option>';
       if (grammarData[grade]) {
-        for (const category in grammarData[grade]) {
-          const option = document.createElement("option");
-          option.value = category;
-          option.textContent = category;
-          categorySelect.appendChild(option);
-        }
+        Object.keys(grammarData[grade]).forEach(cat => {
+          const opt = document.createElement('option');
+          opt.value = cat;
+          opt.textContent = cat;
+          categorySelect.appendChild(opt);
+        });
       }
     }
 
-    // 문법 항목 선택 시 세부 항목(두 번째 단계) 업데이트
-    document.getElementById("grammarCategory").addEventListener("change", function(){
-      const grade = document.getElementById("grade").value;
+    document.getElementById('grammarCategory').addEventListener('change', function () {
+      const grade = document.getElementById('grade').value;
       const category = this.value;
       populateGrammarDetails(grade, category);
     });
 
-    // 세부 항목 셀렉트 박스 업데이트
     function populateGrammarDetails(grade, category) {
-      const detailSelect = document.getElementById("grammarDetail");
+      const detailSelect = document.getElementById('grammarDetail');
       detailSelect.innerHTML = '<option value="">-- 세부 항목 선택 --</option>';
       if (grammarData[grade] && grammarData[grade][category]) {
         grammarData[grade][category].forEach(detail => {
-          const option = document.createElement("option");
-          option.value = detail;
-          option.textContent = detail;
-          detailSelect.appendChild(option);
+          const opt = document.createElement('option');
+          opt.value = detail;
+          opt.textContent = detail;
+          detailSelect.appendChild(opt);
         });
       }
     }
 
-    // 문항 생성 버튼 클릭 시 실행되는 함수
-    function generateQuestion() {
-      const grade = document.getElementById("grade").value;
-      const category = document.getElementById("grammarCategory").value;
-      const detail = document.getElementById("grammarDetail").value;
-      const questionCount = document.getElementById("questionCount").value;
+    /* ── 3. 탭 전환 ── */
+    const tabCreate = document.getElementById('tabCreate');
+    const tabCheck  = document.getElementById('tabCheck');
+    const createSection = document.getElementById('createSection');
+    const checkSection  = document.getElementById('checkSection');
 
-      if (!grade || !category || !detail) {
-        document.getElementById("output").innerText = "학년, 문법 항목, 세부 항목을 모두 선택해주세요.";
+    tabCreate.addEventListener('click', () => {
+      tabCreate.classList.add('active');
+      tabCheck .classList.remove('active');
+      createSection.classList.add('active');
+      checkSection .classList.remove('active');
+    });
+
+    tabCheck.addEventListener('click', () => {
+      tabCheck .classList.add('active');
+      tabCreate.classList.remove('active');
+      checkSection .classList.add('active');
+      createSection.classList.remove('active');
+    });
+
+    /* ── 4. 문항 생성 폼 ── */
+    document.getElementById('grammarForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      generateQuestion();
+    });
+
+    function generateQuestion() {
+      const grade = document.getElementById('grade').value;
+      const category = document.getElementById('grammarCategory').value;
+      const detail = document.getElementById('grammarDetail').value;
+      const questionCount = document.getElementById('questionCount').value;
+
+      if (!grade || !category || !detail || !questionCount) {
+        alert('학년, 문법 항목, 세부 항목, 문항 수를 모두 선택해주세요.');
         return;
       }
 
-      // Cloudflare Workers URL로 요청
-      fetch("https://grammar.sehyunglee2015.workers.dev/generate", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ grade, category, detail, questionCount }),
+      const loader = document.getElementById('activity-loading-indicator');
+      loader.style.display = 'block';
+
+      fetch('https://grammar.sehyunglee2015.workers.dev/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ grade, category, detail, questionCount })
       })
         .then(response => response.json())
         .then(data => {
-          document.getElementById("output").innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+          loader.style.display = 'none';
+          const qText = data[0].question.trim();
+          const aText = data[0].answer.trim();
+
+          document.getElementById('reviewTitle').innerText = `${grade} / ${category} / ${detail}`;
+          document.getElementById('output').innerText = qText;
+          document.getElementById('answerSection').innerText = '정답 및 해설\n\n' + aText;
+          document.getElementById('answerSection').style.display = 'none';
+
+          tabCheck.click();
         })
         .catch(err => {
-          console.error("문제 생성 중 오류 발생:", err);
-          document.getElementById("output").innerText = "문제 생성 중 오류가 발생했습니다.";
+          loader.style.display = 'none';
+          console.error('문제 생성 Fetch 오류:', err);
+          document.getElementById('output').innerText = '문제 생성 중 네트워크 오류가 발생했습니다.';
         });
     }
+
+    /* ── 5. 정답보기 토글 ── */
+    document.getElementById('showAnswerBtn').addEventListener('click', function () {
+      const ansSec = document.getElementById('answerSection');
+      if (ansSec.style.display === 'none') {
+        ansSec.style.display = 'block';
+        this.innerText = '정답 숨기기';
+      } else {
+        ansSec.style.display = 'none';
+        this.innerText = '정답보기';
+      }
+    });
+
+    /* ── 6. 인쇄하기 ── */
+    document.getElementById('printBtn').addEventListener('click', () => window.print());
   </script>
 </body>
 </html>
