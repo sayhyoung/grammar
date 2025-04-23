@@ -1,4 +1,4 @@
-export const grammarSpecificGuidelines = {
+var grammarSpecificGuidelines = {
     // 예시: to부정사 형용사적 용법
     "to부정사 형용사적 용법": `
       ### ${detail} 문항 생성 특별 지침 ###
