@@ -345,6 +345,9 @@
       const detail = document.getElementById('grammarDetail').value;
       const questionCount = document.getElementById('questionCount').value;
 
+       // ← 여기에 로그 넣기
+  console.log("[Client] grade=", grade, "category=", category, "detail=", detail, "count=", questionCount);
+
       if (!grade || !category || !detail || !questionCount) {
         alert('학년, 문법 항목, 세부 항목, 문항 수를 모두 선택해주세요.');
         return;
