@@ -353,7 +353,7 @@
       const loader = document.getElementById('activity-loading-indicator');
       loader.style.display = 'block';
 
-      fetch('https://grammar.sehyunglee2015.workers.dev/generate', {
+      fetch('https://grammar-worker.sehyunglee2015.workers.dev/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ grade, category, detail, questionCount })
